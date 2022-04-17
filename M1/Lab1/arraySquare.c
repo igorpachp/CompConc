@@ -3,7 +3,7 @@
 /* Módulo 1 - Laboratório: 1 */
 /* Aluno: Igor Pacheco Pereira */
 /* DRE: 119052447 */
-/* Codigo: "Hello World" usando threads em C */
+/* Codigo: Quadrado dos elementos de um array */
 
 #include <time.h>
 #include <stdlib.h>
