@@ -11,6 +11,15 @@
 
 #define ARR_LEN			10
 
+void array_square(int * arr, unsigned len) {
+		
+	int * tail = arr + len - 1;
+	while (arr <= tail) {
+		*arr *= *arr;
+		arr++;
+	}
+}
+
 int main(void) {
 	int arr[ARR_LEN];
 
@@ -19,7 +28,15 @@ int main(void) {
 		arr[i] = rand() % 10;
 	}
 
-	printf("vetor:\t");
+	printf("vetor antes:\t");
+	for (int i = 0; i < ARR_LEN; i++) {
+		printf("%d ", arr[i]);
+	}
+	puts("");
+
+	array_square(&arr[0], ARR_LEN);
+
+	printf("vetor depois:\t");
 	for (int i = 0; i < ARR_LEN; i++) {
 		printf("%d ", arr[i]);
 	}
