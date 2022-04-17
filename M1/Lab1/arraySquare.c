@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define ARR_LEN  10
+#define ARR_LEN  10000
 #define NTHREADS 2
 
 /* 
@@ -45,6 +45,7 @@ void * array_square(void * arg) {
 
 int main(void) {
 	int arr[ARR_LEN];
+	int reference[ARR_LEN];
 	pthread_t tid[NTHREADS];  // identificadores das threads no sistema
 	array_square_args_t * arg;  // ponteiro para os futuros argumentos
 	int * arr_heads[NTHREADS];  // primeiro elemento do pedaço recebido por uma thread
@@ -53,15 +54,9 @@ int main(void) {
 	// populando o vetor aleatóriamente
 	srand(time(NULL));
 	for (int i = 0; i < ARR_LEN; i++) {
-		arr[i] = rand() % 10;
+		arr[i] = rand() % 1024;
+		reference[i] = arr[i];
 	}
-
-	// exibindo vetor antes das operações
-	printf("vetor antes:\t");
-	for (int i = 0; i < ARR_LEN; i++) {
-		printf("%d ", arr[i]);
-	}
-	puts("");
 
 	// ao dividir o vetor entre as threads, quero
 	// garantir que o número de operações realizadas
@@ -108,15 +103,15 @@ int main(void) {
 		}
 	}
 
-	// esperando o término da thread
-	pthread_join(tid[0], NULL);
+	// esperando o término de todas as threads
+	for (int i = 0; i < NTHREADS; i++)
+		pthread_join(tid[i], NULL);
 
-	// exibindo vetor depois das operações
-	printf("vetor depois:\t");
 	for (int i = 0; i < ARR_LEN; i++) {
-		printf("%d ", arr[i]);
+		if (reference[i] * reference[i] != arr[i])
+			printf("--ERRO: Resultado incorreto para elemento #%d --> %d*%d != %d\n", 
+					i, reference[i], reference[i], arr[i]);
 	}
-	puts("");
 
 	return 0;
 }
