@@ -18,8 +18,8 @@
  * pela função 'array_square'
  */
 typedef struct {
-	int * arr;
-	unsigned len;
+	int * head;
+	int * tail;
 } array_square_args_t;
 
 /* 
@@ -28,16 +28,15 @@ typedef struct {
  * vetor de forma que o resultado de um elemento fique
  * no lugar previamente ocupado por ele
  * Entradas esperadas:
- *   arr --> um ponteiro para o primeiro elemento
- *   len --> o número de elementos no vetor
+ *   head --> um ponteiro para o primeiro elemento
+ *   tail --> um ponteiro para o último elemento
  */
 void * array_square(void * arg) {
 	array_square_args_t * args = (array_square_args_t *) arg;
 
-	int * tail = args->arr + args->len - 1; // guardando posição do último elemento
-	while (args->arr <= tail) {
-		*args->arr *= *args->arr;
-		args->arr++;
+	while (args->head <= args->tail) {
+		*args->head *= *args->head;
+		args->head++;
 	}
 
 	free(arg); // liberando a memoria alocada para os argumentos
@@ -48,6 +47,8 @@ int main(void) {
 	int arr[ARR_LEN];
 	pthread_t tid[NTHREADS];  // identificadores das threads no sistema
 	array_square_args_t * arg;  // ponteiro para os futuros argumentos
+	int * arr_heads[NTHREADS];  // primeiro elemento do pedaço recebido por uma thread
+	int * arr_tails[NTHREADS];  // último elemento (incluso) do pedaço recebido por uma thread
 
 	// populando o vetor aleatóriamente
 	srand(time(NULL));
@@ -62,23 +63,53 @@ int main(void) {
 	}
 	puts("");
 
-	// gerando estrutura com os argumentos
-	arg = malloc(sizeof(array_square_args_t));
-	if (!arg) {
-		printf("--ERRO: malloc()\n");
-		exit(-1);
+	// ao dividir o vetor entre as threads, quero
+	// garantir que o número de operações realizadas
+	// por cada fluxo seja o mais parecido possível
+	// para isso, irei calcular o resto da divisao
+	// do tamanho do vetor pela numero de threads
+	// e usarei esta informação para distribuir os
+	// elementos excedentes entre elas
+	unsigned remainder = ARR_LEN % NTHREADS;
+
+	arr_heads[0] = &arr[0];
+	// gerando as n threads
+	for (int i = 0; i < NTHREADS; i++) {
+		if (i == 0) {
+			// a primeira thread nunca recebe um elemento excedente
+			arr_tails[i] = arr_heads[i] + ARR_LEN / NTHREADS - 1;
+		}
+		else {
+			// as demais threads começam com o sucessor
+			// imediato do último elemento da thread anterior
+			arr_heads[i] = arr_tails[i-1] + 1;
+			arr_tails[i] = arr_heads[i] + ARR_LEN / NTHREADS - 1;
+			if (remainder) {
+				// caso ainda haja excedentes, a thread 
+				// atual fica responsável por um deles
+				arr_tails[i]++;
+				remainder--;
+			}
+		}
+
+		// gerando estrutura com os argumentos para a nova thread
+		arg = malloc(sizeof(array_square_args_t));
+		if (!arg) {
+			printf("--ERRO: malloc()\n");
+			exit(-1);
+		}
+		arg->head = arr_heads[i];
+		arg->tail = arr_tails[i];
+
+		// criando uma nova thread de execução
+		if (pthread_create(&tid[i], NULL, array_square, (void *) arg)) {
+			printf("--ERRO: pthread_create()\n");
+			exit(-1);
+		}
 	}
-	arg->arr = &arr[0];
-	arg->len = ARR_LEN;
-	
-	// criando a thread de execução
-	if (pthread_create(&tid, NULL, array_square, (void *) arg)) {
-		printf("--ERRO: pthread_create()\n");
-		exit(-1);
-	}
-	
+
 	// esperando o término da thread
-	pthread_join(tid, NULL);
+	pthread_join(tid[0], NULL);
 
 	// exibindo vetor depois das operações
 	printf("vetor depois:\t");
