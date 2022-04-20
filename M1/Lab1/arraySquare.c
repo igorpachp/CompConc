@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define ARR_LEN  10000
-#define NTHREADS 2
+#define ARR_LEN  10
+#define NTHREADS 20
 
 /* 
  * Estrutura para agrupar os argumentos esperados
@@ -34,7 +34,7 @@ typedef struct {
 void * array_square(void * arg) {
 	array_square_args_t * args = (array_square_args_t *) arg;
 
-	while (args->head <= args->tail) {
+	while (args->head && args->head <= args->tail) {
 		*args->head *= *args->head;
 		args->head++;
 	}
@@ -84,15 +84,20 @@ int main(void) {
 			}
 		}
 		else {
-			// as demais threads começam com o sucessor
-			// imediato do último elemento da thread anterior
-			arr_heads[i] = arr_tails[i-1] + 1;
-			arr_tails[i] = arr_heads[i] + ARR_LEN / NTHREADS - 1;
-			if (remainder) {
-				// caso ainda haja excedentes, a thread 
-				// atual fica responsável por um deles
-				arr_tails[i]++;
-				remainder--;
+			if (arr_tails[i-1] < &arr[ARR_LEN-1]) {
+				// as demais threads começam com o sucessor
+				// imediato do último elemento da thread anterior
+				arr_heads[i] = arr_tails[i-1] + 1;
+				arr_tails[i] = arr_heads[i] + ARR_LEN / NTHREADS - 1;
+				if (remainder) {
+					// caso ainda haja excedentes, a thread 
+					// atual fica responsável por um deles
+					arr_tails[i]++;
+					remainder--;
+				}
+			}
+			else {
+				arr_heads[i] = arr_tails[i] = NULL;
 			}
 		}
 
