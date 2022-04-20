@@ -50,8 +50,9 @@ int main(void) {
 	array_square_args_t * arg;  // ponteiro para os futuros argumentos
 	int * arr_heads[NTHREADS];  // primeiro elemento do pedaço recebido por uma thread
 	int * arr_tails[NTHREADS];  // último elemento (incluso) do pedaço recebido por uma thread
+	short err_flag = 0;  // guarda a quantidade de elementos incorretos
 
-	// populando o vetor aleatóriamente
+	puts("populando o vetor aleatoriamente...");
 	srand(time(NULL));
 	for (int i = 0; i < ARR_LEN; i++) {
 		arr[i] = rand() % 1024;
@@ -71,8 +72,16 @@ int main(void) {
 	// gerando as n threads
 	for (int i = 0; i < NTHREADS; i++) {
 		if (i == 0) {
-			// a primeira thread nunca recebe um elemento excedente
-			arr_tails[i] = arr_heads[i] + ARR_LEN / NTHREADS - 1;
+			// quando o número de threads é maior do que o vetor
+			// queremos garantir que aprimeira thread recebe um elemento
+			if (NTHREADS > ARR_LEN) {
+				arr_tails[i] = arr_heads[i];
+				remainder--;
+			}
+			else {
+				// a primeira thread nunca recebe um elemento excedente
+				arr_tails[i] = arr_heads[i] + ARR_LEN / NTHREADS - 1;
+			}
 		}
 		else {
 			// as demais threads começam com o sucessor
@@ -108,10 +117,17 @@ int main(void) {
 		pthread_join(tid[i], NULL);
 
 	for (int i = 0; i < ARR_LEN; i++) {
-		if (reference[i] * reference[i] != arr[i])
+		if (reference[i] * reference[i] != arr[i]) {
 			printf("--ERRO: Resultado incorreto para elemento #%d --> %d*%d != %d\n", 
 					i, reference[i], reference[i], arr[i]);
+			err_flag++;
+		}
 	}
+
+	if (err_flag)
+		printf("Numero de elementos incorretos: %d\n", err_flag);
+	else
+		printf("Operação concluída com sucesso.\n");
 
 	return 0;
 }
