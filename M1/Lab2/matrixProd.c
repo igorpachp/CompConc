@@ -11,6 +11,8 @@
 
 #define M_SIZE 4
 
+float * alloc_matrix(float **, unsigned);
+void display_matrix(float *, unsigned);
 void seq_product(float *, float *, float *, unsigned);
 
 int main(void) {
@@ -19,28 +21,16 @@ int main(void) {
     float * res_matrix; // matriz de resultado
 
     // alocando memória para as matrizes
-    a_matrix = malloc(sizeof(int) * M_SIZE * M_SIZE);
-    if (!a_matrix) {
-        printf("--ERRO: malloc()\n");
-        exit(-1);
-    }
-    b_matrix = malloc(sizeof(int) * M_SIZE * M_SIZE);
-    if (!b_matrix) {
-        printf("--ERRO: malloc()\n");
-        exit(-1);
-    }
-    res_matrix = malloc(sizeof(int) * M_SIZE * M_SIZE);
-    if (!res_matrix) {
-        printf("--ERRO: malloc()\n");
-        exit(-1);
-    }
+    alloc_matrix(&a_matrix, M_SIZE);
+    alloc_matrix(&b_matrix, M_SIZE);
+    alloc_matrix(&res_matrix, M_SIZE);
 
     // inicialização
     srand(time(NULL));
     for (int row = 0; row < M_SIZE; row++) {
         for (int col = 0; col < M_SIZE; col++) {
-            *(a_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 100.0);
-            *(b_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 100.0);
+            *(a_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 10.0);
+            *(b_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 10.0);
             *(res_matrix + row * M_SIZE + col) = 0.0;
         }
     }
@@ -50,31 +40,48 @@ int main(void) {
 
     // exibindo matrizes
     puts("matriz a");
-    for (int row = 0; row < M_SIZE; row++) {
-        for (int col = 0; col < M_SIZE; col++) {
-            printf("%3.2f ", *(a_matrix + row * M_SIZE + col));
-        }
-        printf("\n");
-    }
+    display_matrix(a_matrix, M_SIZE);
     puts("\nmatriz b");
-    for (int row = 0; row < M_SIZE; row++) {
-        for (int col = 0; col < M_SIZE; col++) {
-            printf("%.2f ", *(b_matrix + row * M_SIZE + col));
-        }
-        printf("\n");
-    }
+    display_matrix(b_matrix, M_SIZE);
     puts("\nmatriz resultado");
-    for (int row = 0; row < M_SIZE; row++) {
-        for (int col = 0; col < M_SIZE; col++) {
-            printf("%.2f ", *(res_matrix + row * M_SIZE + col));
-        }
-        printf("\n");
-    }
+    display_matrix(res_matrix, M_SIZE);
 
     free(a_matrix);
     free(b_matrix);
+    free(res_matrix);
 
     return 0;
+}
+
+/* 
+ * Esta função aloca o espaço necessário para uma matriz.
+ * Entradas esperadas:
+ *   M --> O ponteiro para uma variavel que guarda um ponteiro para float
+ *   size --> O tamanho da matrize
+ */
+float * alloc_matrix(float ** M, unsigned size) {
+    *M = malloc(sizeof(float) * size * size);
+    if (!*M) {
+        printf("--ERRO: malloc()\n");
+        exit(-1);
+    }
+
+    return *M;
+}
+
+/* 
+ * Esta função exibe uma matriz.
+ * Entradas esperadas:
+ *   M --> O ponteiro para uma matriz
+ *   size --> O tamanho da matrize
+ */
+void display_matrix(float * M, unsigned size) {
+    for (int row = 0; row < M_SIZE; row++) {
+        for (int col = 0; col < M_SIZE; col++) {
+            printf("%3.2f ", *(M + row * M_SIZE + col));
+        }
+        printf("\n");
+    }
 }
 
 /* 
