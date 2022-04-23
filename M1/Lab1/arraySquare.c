@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define ARR_LEN  10
-#define NTHREADS 20
+#define ARR_LEN  10000
+#define NTHREADS 2
 
 /* 
  * Estrutura para agrupar os argumentos esperados
