@@ -11,18 +11,32 @@
 
 #define M_SIZE 4
 
+/* 
+ * Estrutura para agrupar os argumentos esperados
+ * pela função 'product'
+ */
+typedef struct {
+	int row;
+	int size;
+} product_args_t;
+
+float * a_matrix;
+float * b_matrix;
+float * res_matrix_seq; // matriz de resultado sequencial
+float * res_matrix; // matriz de resultado sequencial
+
 float * alloc_matrix(float **, unsigned);
 void display_matrix(float *, unsigned);
-void seq_product(float *, float *, float *, unsigned);
+void seq_product(unsigned);
+void * product(void *);
 
 int main(void) {
-    float * a_matrix;
-    float * b_matrix;
-    float * res_matrix; // matriz de resultado
+    product_args_t * arg;
 
     // alocando memória para as matrizes
     alloc_matrix(&a_matrix, M_SIZE);
     alloc_matrix(&b_matrix, M_SIZE);
+    alloc_matrix(&res_matrix_seq, M_SIZE);
     alloc_matrix(&res_matrix, M_SIZE);
 
     // inicialização
@@ -31,23 +45,36 @@ int main(void) {
         for (int col = 0; col < M_SIZE; col++) {
             *(a_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 10.0);
             *(b_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 10.0);
+            *(res_matrix_seq + row * M_SIZE + col) = 0.0;
             *(res_matrix + row * M_SIZE + col) = 0.0;
         }
     }
 
     // produto
-    seq_product(a_matrix, b_matrix, res_matrix, M_SIZE);
+    seq_product(M_SIZE);
+
+    arg = malloc(sizeof(product_args_t));
+    if (!arg) {
+        printf("--ERRO: malloc()\n");
+        exit(-1);
+    }
+    arg->row = 0;
+    arg->size = M_SIZE;
+    product(arg);
 
     // exibindo matrizes
     puts("matriz a");
     display_matrix(a_matrix, M_SIZE);
     puts("\nmatriz b");
     display_matrix(b_matrix, M_SIZE);
-    puts("\nmatriz resultado");
+    puts("\nmatriz resultado sequencial");
+    display_matrix(res_matrix_seq, M_SIZE);
+    puts("\nmatriz resultado concorrente");
     display_matrix(res_matrix, M_SIZE);
 
     free(a_matrix);
     free(b_matrix);
+    free(res_matrix_seq);
     free(res_matrix);
 
     return 0;
@@ -86,24 +113,42 @@ void display_matrix(float * M, unsigned size) {
 
 /* 
  * Esta função calcula o produto entre duas matrizes de 
- * forma sequencial, salvando o resultado em uma terceira 
- * matriz também recebida na chamada. É esperado que as 
- * matrizes fornecidas sejam quadradas.
+ * forma sequencial, salvando o resultado em uma terceira. 
+ * É esperado que as matrizes fornecidas sejam quadradas.
  * Entradas esperadas:
- *   A --> O ponteiro para uma matriz de números de ponto flutuante
- *   B --> O ponteiro para uma matriz de números de ponto flutuante
- *   C --> O ponteiro para a matriz de resultado
  *   size --> O tamanho das matrizes
  */
-void seq_product(float * A, float * B, float * C, unsigned size) {
-
+void seq_product(unsigned size) {
     for (int i = 0; i < M_SIZE; i++) {
         for (int j = 0; j < M_SIZE; j++) {
             float sum = 0.0;
             for (int k = 0; k < M_SIZE; k++) {
-                sum += *(A + i*size + k) * *(B + k*size + j);
+                sum += *(a_matrix + i*size + k) * *(b_matrix + k*size + j);
             }
-            *(C + i*size + j) = sum;
+            *(res_matrix_seq + i*size + j) = sum;
         }
     }
+}
+
+/* 
+ * Esta função calcula o produto entre duas matrizes de 
+ * forma concorrente, salvando o resultado em uma terceira 
+ * matriz. É esperado que as matrizes fornecidas sejam quadradas.
+ * Entradas esperadas:
+ *   size --> O tamanho das matrizes
+ */
+void * product(void * arg) {
+    product_args_t * args = (product_args_t *) arg;
+
+    for (int i = 0; i < args->size; i++) {
+        float sum = 0;
+        for (int j = 0; j < args->size; j++) {
+            sum += *(a_matrix + args->row*args->size + j) * *(b_matrix + j*args->size + i);
+        }
+        *(res_matrix + args->row*args->size + i) = sum;
+    }
+
+    free(arg);
+
+    return NULL;
 }
