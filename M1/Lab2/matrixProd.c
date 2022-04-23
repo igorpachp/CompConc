@@ -8,8 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <pthread.h>
 
-#define M_SIZE 4
+#define DEFAULT_M_SIZE   4 // tamanho padrão das matrizes
+#define DEFAULT_NTHREADS 4 // número padão de threads
 
 /* 
  * Estrutura para agrupar os argumentos esperados
@@ -25,52 +27,90 @@ float * b_matrix;
 float * res_matrix_seq; // matriz de resultado sequencial
 float * res_matrix; // matriz de resultado sequencial
 
-float * alloc_matrix(float **, unsigned);
-void display_matrix(float *, unsigned);
-void seq_product(unsigned);
-void * product(void *);
+float * alloc_matrix(float **, unsigned); // alocar matrizes
+void display_matrix(float *, unsigned); // exibir matrizes
+void seq_product(unsigned); // produto sequencial
+void * product(void *); // produto concorrente
 
-int main(void) {
-    product_args_t * arg;
+int main(int argc, char * argv[]) {
+    pthread_t * tid;
+    product_args_t * args;
+    unsigned nthreads;
+    unsigned size;
+
+    // verificação de entradas
+    switch (argc)
+    {
+        case 1:
+            // Caso o programa seja chamado sem parametros, 
+            // usarei um tamanho padrão paras as matrizes 
+            // e um número padrão de threads.
+            size = DEFAULT_M_SIZE;
+            nthreads = DEFAULT_NTHREADS;
+            puts("1");
+            break;
+        case 2:
+            // Caso o programa seja chamado com apenas um 
+            // parametro, ele será o tamanho das as matrizes 
+            // e usarei um número padrão de threads.
+            size = atoi(argv[1]);
+            nthreads = DEFAULT_NTHREADS;
+            puts("2");
+            break;
+        case 3:
+            // Caso o programa seja chamado os dois argumentos  
+            // o primeiro sera o tamanho das as matrizes, e o 
+            // segundo o número de threads.
+            size = atoi(argv[1]);
+            nthreads = atoi(argv[2]);
+            puts("3");
+            break;
+        default:
+            puts("ERRO: Numero de parametros incorreto!\n");
+            puts("Forma de uso: ./<app> <matrix-size*> <number-of-threads*>\n");
+            puts("Parametros seguidos de '*' sao opcionais...\n");
+            exit(-1);
+            break;
+    }
 
     // alocando memória para as matrizes
-    alloc_matrix(&a_matrix, M_SIZE);
-    alloc_matrix(&b_matrix, M_SIZE);
-    alloc_matrix(&res_matrix_seq, M_SIZE);
-    alloc_matrix(&res_matrix, M_SIZE);
+    alloc_matrix(&a_matrix, DEFAULT_M_SIZE);
+    alloc_matrix(&b_matrix, DEFAULT_M_SIZE);
+    alloc_matrix(&res_matrix_seq, DEFAULT_M_SIZE);
+    alloc_matrix(&res_matrix, DEFAULT_M_SIZE);
 
     // inicialização
     srand(time(NULL));
-    for (int row = 0; row < M_SIZE; row++) {
-        for (int col = 0; col < M_SIZE; col++) {
-            *(a_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 10.0);
-            *(b_matrix + row * M_SIZE + col) = (float) rand() / (float) (RAND_MAX / 10.0);
-            *(res_matrix_seq + row * M_SIZE + col) = 0.0;
-            *(res_matrix + row * M_SIZE + col) = 0.0;
+    for (int row = 0; row < size; row++) {
+        for (int col = 0; col < size; col++) {
+            *(a_matrix + row * size + col) = (float) rand() / (float) (RAND_MAX / 10.0);
+            *(b_matrix + row * size + col) = (float) rand() / (float) (RAND_MAX / 10.0);
+            *(res_matrix_seq + row * size + col) = 0.0;
+            *(res_matrix + row * size + col) = 0.0;
         }
     }
 
     // produto
-    seq_product(M_SIZE);
+    seq_product(size);
 
-    arg = malloc(sizeof(product_args_t));
-    if (!arg) {
+    args = malloc(sizeof(product_args_t));
+    if (!args) {
         printf("--ERRO: malloc()\n");
         exit(-1);
     }
-    arg->row = 0;
-    arg->size = M_SIZE;
-    product(arg);
+    args->row = 0;
+    args->size = size;
+    product(args);
 
     // exibindo matrizes
     puts("matriz a");
-    display_matrix(a_matrix, M_SIZE);
+    display_matrix(a_matrix, size);
     puts("\nmatriz b");
-    display_matrix(b_matrix, M_SIZE);
+    display_matrix(b_matrix, size);
     puts("\nmatriz resultado sequencial");
-    display_matrix(res_matrix_seq, M_SIZE);
+    display_matrix(res_matrix_seq, size);
     puts("\nmatriz resultado concorrente");
-    display_matrix(res_matrix, M_SIZE);
+    display_matrix(res_matrix, size);
 
     free(a_matrix);
     free(b_matrix);
@@ -103,9 +143,9 @@ float * alloc_matrix(float ** M, unsigned size) {
  *   size --> O tamanho da matrize
  */
 void display_matrix(float * M, unsigned size) {
-    for (int row = 0; row < M_SIZE; row++) {
-        for (int col = 0; col < M_SIZE; col++) {
-            printf("%3.2f ", *(M + row * M_SIZE + col));
+    for (int row = 0; row < size; row++) {
+        for (int col = 0; col < size; col++) {
+            printf("%3.2f ", *(M + row * size + col));
         }
         printf("\n");
     }
@@ -119,10 +159,10 @@ void display_matrix(float * M, unsigned size) {
  *   size --> O tamanho das matrizes
  */
 void seq_product(unsigned size) {
-    for (int i = 0; i < M_SIZE; i++) {
-        for (int j = 0; j < M_SIZE; j++) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
             float sum = 0.0;
-            for (int k = 0; k < M_SIZE; k++) {
+            for (int k = 0; k < size; k++) {
                 sum += *(a_matrix + i*size + k) * *(b_matrix + k*size + j);
             }
             *(res_matrix_seq + i*size + j) = sum;
