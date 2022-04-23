@@ -36,6 +36,7 @@ float * alloc_matrix(float **, unsigned); // alocar matrizes
 void display_matrix(float *, unsigned); // exibir matrizes
 void seq_product(unsigned); // produto sequencial
 void * product(void *); // produto concorrente
+int equals(unsigned size); // compara os resultados
 
 int main(int argc, char * argv[]) {
     pthread_t * tid;
@@ -156,15 +157,11 @@ int main(int argc, char * argv[]) {
         pthread_join(*(tid + i), NULL);
     }
 
-    // exibindo matrizes
-    puts("matriz a");
-    display_matrix(a_matrix, size);
-    puts("\nmatriz b");
-    display_matrix(b_matrix, size);
-    puts("\nmatriz resultado sequencial");
-    display_matrix(res_matrix_seq, size);
-    puts("\nmatriz resultado concorrente");
-    display_matrix(res_matrix, size);
+    // comparando matrizes
+    if (equals(size))
+        printf("As matrizes resultantes são compativeis!\n");
+    else
+        printf("As matrizes resultantes são DIFERENTES!\n");
 
     // liberando memória
     free(a_matrix);
@@ -257,4 +254,23 @@ void * product(void * arg) {
     free(arg);
 
     return NULL;
+}
+
+/* 
+ * Esta função compara o resultado do produto de matrizes
+ * dos métodos sequencial e concorrente.
+ * Retorna:
+ *   0 (falso) em caso de haver algum elemento diferente
+ *   1 (verdadeiro) caso todos os elementos sejam iguais
+ */
+int equals(unsigned size) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (*(res_matrix_seq + i*size + j) != *(res_matrix + i*size + j)) {
+                return 0;
+            }
+        }    
+    }
+
+    return 1;
 }
