@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+#include "timer.h"
 
 #define DEFAULT_M_SIZE   4 // tamanho padrão das matrizes
 #define DEFAULT_NTHREADS 4 // número padão de threads
@@ -42,6 +43,8 @@ int main(int argc, char * argv[]) {
     product_args_t * args;
     unsigned nthreads;
     unsigned size;
+    double start_s, end_s, elapsed_s;
+    double start_c, end_c, elapsed_c;
 
     // verificação de entradas
     switch (argc)
@@ -103,7 +106,11 @@ int main(int argc, char * argv[]) {
     }
 
     // produto sequencial
+    GET_TIME(start_s);
     seq_product(size);
+    GET_TIME(end_s);
+    elapsed_s = end_s - start_s;
+    printf("Tempo usado pela funcao sequencial: %.6lf\n", elapsed_s);
 
     // produto concorrente
 	// Optei por fornecer a cada thread a tarefa de calcular
@@ -115,6 +122,7 @@ int main(int argc, char * argv[]) {
     // distribuirei as linhas restantes dentre as threads. Assim, 
     // algumas threads serão responsáveis por calcular uma linha 
     // adicional.
+    GET_TIME(start_c);
     unsigned remainder = size % nthreads;
     int curr_row = 0;
 	// gerando as n threads
@@ -155,16 +163,10 @@ int main(int argc, char * argv[]) {
     for (int i = 0; i < nthreads; i++) {
         pthread_join(*(tid + i), NULL);
     }
-
-    // exibindo matrizes
-    puts("matriz a");
-    display_matrix(a_matrix, size);
-    puts("\nmatriz b");
-    display_matrix(b_matrix, size);
-    puts("\nmatriz resultado sequencial");
-    display_matrix(res_matrix_seq, size);
-    puts("\nmatriz resultado concorrente");
-    display_matrix(res_matrix, size);
+    GET_TIME(end_c);
+    elapsed_c = end_c - start_c;
+    printf("Tempo usado pela funcao concorrente: %.6lf\n", elapsed_c);
+    printf("Aceleração: %.6lf\n", elapsed_s / elapsed_c);
 
     // liberando memória
     free(a_matrix);
