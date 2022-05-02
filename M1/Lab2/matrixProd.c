@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
-#include "timer.h"
+#include "../../lib/timer.h"
 
 #define DEFAULT_M_SIZE   4 // tamanho padrão das matrizes
 #define DEFAULT_NTHREADS 4 // número padão de threads
@@ -190,7 +190,7 @@ int main(int argc, char * argv[]) {
  * Esta função aloca o espaço necessário para uma matriz.
  * Entradas esperadas:
  *   M --> O ponteiro para uma variavel que guarda um ponteiro para float
- *   size --> O tamanho da matrize
+ *   size --> O tamanho da matrizes
  */
 float * alloc_matrix(float ** M, unsigned size) {
     *M = malloc(sizeof(float) * size * size);
@@ -206,7 +206,7 @@ float * alloc_matrix(float ** M, unsigned size) {
  * Esta função exibe uma matriz.
  * Entradas esperadas:
  *   M --> O ponteiro para uma matriz
- *   size --> O tamanho da matrize
+ *   size --> O tamanho da matrizes
  */
 void display_matrix(float * M, unsigned size) {
     for (int row = 0; row < size; row++) {
