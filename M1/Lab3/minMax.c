@@ -92,8 +92,6 @@ int main(int argc, char * argv[]) {
     min_max_seq(arr_seq, arr_size, &lesser, &greater);
     GET_TIME(end_s);
     elapsed_s = end_s - start_s;
-    printf("Menor: %3.2f\t\tMaior: %3.2f\n", lesser, greater);
-    printf("Tempo usado pela funcao sequencial: %.6lf\n", elapsed_s);
 
     // menor e maior concorrente
     GET_TIME(start_c);
@@ -133,8 +131,12 @@ int main(int argc, char * argv[]) {
 
     GET_TIME(end_c);
     elapsed_c = end_c - start_c;
+    printf("Menor: %3.2f\t\tMaior: %3.2f\n", lesser, greater);
     printf("Menor: %3.2f\t\tMaior: %3.2f\n", min, max);
+    printf("Tempo usado pela funcao sequencial: %.6lf\n", elapsed_s);
     printf("Tempo usado pela funcao concorrente: %.6lf\n", elapsed_c);
+    printf("Aceleracao: %.6lf\n", elapsed_s / elapsed_c);
+
 
     if (min == lesser && max == greater)
         printf("Os resultados são compativeis!\n");
