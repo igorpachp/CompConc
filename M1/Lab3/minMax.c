@@ -1,6 +1,6 @@
 /* Disciplina: Computacao Concorrente */
 /* Prof.: Silvana Rossetto */
-/* Módulo 1 - Laboratório: 2 */
+/* Módulo 1 - Laboratório: 3 */
 /* Aluno: Igor Pacheco Pereira */
 /* DRE: 119052447 */
 /* Codigo: Implementação e avaliação de aplicações concorrentes (Parte 2) */
