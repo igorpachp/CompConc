@@ -12,13 +12,15 @@
 #define DEFAULT_ARR_SIZE 10 // tamanho padrão do vetor
 #define DEFAULT_NTHREADS 1 // número padrão de threads
 
+typedef enum {False, True} boolean_t;
+
 int * arr = NULL;
 float * roots_seq = NULL;
 float * roots_con = NULL;
 long long unsigned size;
 int nthreads;
 
-void isPrime(int[], float[], int);
+boolean_t is_prime(int);
 void init_arr(); // inicializa o vetor aleatoriamente
 void display_arr(); // exibir vetor
 
@@ -48,7 +50,6 @@ int main(int argc, char * argv[]) {
             exit(-1);
             break;
     }
-    printf("%d\n", size);
     
     // alocação de memória
     arr = malloc(sizeof(int) * size);
@@ -62,11 +63,35 @@ int main(int argc, char * argv[]) {
 
     // exibindo vetor
     display_arr();
+    for (long long unsigned i = 0; i < size; i++) {
+        printf("%s ", is_prime(*(arr + i)) ? "sim" : "nao");
+    }
+    printf("\n");
 
     // liberando memória
     free(arr);
 
     return 0;
+}
+
+/* 
+ * Esta função verifica se o dado número é primo.
+ * Entradas esperadas:
+ *   num --> Um número inteiro
+ * Saída:
+ *   True --> Caso seja primo.
+ *   False --> Caso contrário.
+ */
+boolean_t is_prime(int num) {
+    if (num <= 0 || num == 1) return False;
+
+    int factor = 2;
+
+    while (factor * factor < num) {
+        if (num % factor++ == 0) return False;
+    }
+
+    return True;
 }
 
 /* 
@@ -77,7 +102,7 @@ void init_arr() {
     srand(time(NULL));
 
     while (arr_size--) {
-        *(arr + arr_size) = rand() % 100001;
+        *(arr + arr_size) = rand() % 101;
     }
 }
 
@@ -88,7 +113,7 @@ void init_arr() {
  *   size --> O tamanho do vetor
  */
 void display_arr() {
-    for (int i = 0; i < size; i++) {
+    for (long long unsigned i = 0; i < size; i++) {
         printf("%d ", *(arr + i));
     }
     printf("\n");
