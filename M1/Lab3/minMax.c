@@ -250,5 +250,5 @@ void * min_max_con(void * arg) {
 
     free(args);
 
-    return (void *) result;
+    pthread_exit((void *) result);
 }

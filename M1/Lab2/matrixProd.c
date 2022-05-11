@@ -266,7 +266,7 @@ void * product(void * arg) {
     free(args->rows);
     free(arg);
 
-    return NULL;
+    pthread_exit(NULL);
 }
 
 /* 
