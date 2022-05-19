@@ -1,4 +1,4 @@
-# Questionário - Laboratório 1
+# Questionário - Módulo 1, Laboratório 1
 
 #### 1 - Abra o arquivo **hello.c**, execute o programa *varias vezes* e observe os resultados impressos na tela. **Há mudanças na ordem de execução das threads? Por que isso ocorre?**
 Sim, há mudança na ordem de execução. Isto ocorre por que não há como garantir que as threads terminarão seus fluxos na mesma ordem que foram criadas.
