@@ -21,5 +21,5 @@ Não, uma das execuções impimiu *X=35*.
 #### Tópico 3 - Podemos substituir a linha 50 pela linha 51? Justifique.
 A linha 51 não é equivalente a 50. Por fazer uso de um laço, a linha 50 garante que a impressão seguirá a condição lógica pois verifica se *X* continua sendo múltiplo de 10 após a thread ser desbloqueada, enquanto a linha 51 imprime o valor de *X* mesmo que alguma thread modifique seu valor indevidamente no meio tempo entre ser desbloqueada e imprimir.
 
-#### Tópico 4 - Comente a linha 50 e descomente a linha 51, e execute novamente a aplicação *várias vezes*. O log de execução impresso na tela foi sempre correto? A condição logica da aplicação foi atendida em todas as execuções?
+#### Tópico 4 - Comente a linha 50 e descomente a linha 51, e execute novamente a aplicação *várias vezes*. O log de execução impresso na tela foi sempre correto? A condição lógica da aplicação foi atendida em todas as execuções?
 Uma das execuções utilizando a linha 51 imprimiu *X=35*, desrespeitando a condição lógica. Já as execuções com a linha 50 se mantiveram consistentes imprimindo apenas múltiplos de 10.
