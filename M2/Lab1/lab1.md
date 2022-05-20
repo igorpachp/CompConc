@@ -1,7 +1,7 @@
 # Questionário - Módulo 2, Laboratório 1
 
 ## Atividade 1
-#### Tópico 2 - Execute o programa **várias vezes**. O log de execução impresso na tela foi sempre o esperado? A condição lógica da aplicação foi atendida em todas as execuções?
+#### Tópico 2 - Execute o programa *várias vezes*. O log de execução impresso na tela foi sempre o esperado? A condição lógica da aplicação foi atendida em todas as execuções?
 Sim, sempre houve a impressão de dois "HELLO" antes que um "BYE" fosse impresso.
 
 #### Tópico 3 - Agora altere o numero de threads A para 1. O que vai ocorrer na execução? O programa vai terminar? Por que?
@@ -13,3 +13,13 @@ Para que o programa permita duas threads B e duas threads A, devemos aumentar o 
 ## Atividade 2
 #### Tópico 2 - Execute o programa *várias vezes*. O log de execução impresso na tela foi sempre o esperado? A condição lógica da aplicação foi atendida em todas as execuções?
 Sim, a impressão de abos os "BYE" ocorreram sempre após da impressão do "HELLO".
+
+## Atividade 3
+#### Tópico 2 - Execute o programa *várias vezes*. O log de execução impresso na tela foi sempre o esperado? A condição lógica da aplicação foi atendida em todas as execuções?
+Não, uma das execuções impimiu *X=35*.
+
+#### Tópico 3 - Podemos substituir a linha 50 pela linha 51? Justifique.
+A linha 51 não é equivalente a 50. Por fazer uso de um laço, a linha 50 garante que a impressão seguirá a condição lógica pois verifica se *X* continua sendo múltiplo de 10 após a thread ser desbloqueada, enquanto a linha 51 imprime o valor de *X* mesmo que alguma thread modifique seu valor indevidamente no meio tempo entre ser desbloqueada e imprimir.
+
+#### Tópico 4 - Comente a linha 50 e descomente a linha 51, e execute novamente a aplicação *várias vezes*. O log de execução impresso na tela foi sempre correto? A condição logica da aplicação foi atendida em todas as execuções?
+Uma das execuções utilizando a linha 51 imprimiu *X=35*, desrespeitando a condição lógica. Já as execuções com a linha 50 se mantiveram consistentes imprimindo apenas múltiplos de 10.
