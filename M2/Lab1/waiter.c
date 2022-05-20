@@ -12,11 +12,9 @@
 #define DEFAULT_NTHREADS 5 // número padrão de threads
 #define NTASKS           5 // número de tarefas
 
-void * task5(void *);
-void * task2(void *);
-void * task3(void *);
-void * task4(void *);
-void * task1(void *);
+void * last_task(void *);
+void * middle_task(void *);
+void * first_task(void *);
 
 // variáveis globais
 int message_count = 0;
@@ -31,6 +29,7 @@ pthread_mutex_t lock;
 // usarei duas condições, uma para as threads que executam
 // logo após a primeira e outra para a última thread
 pthread_cond_t condition[2];
+void * tasks[NTASKS] = {first_task, middle_task, middle_task, middle_task, last_task};
 
 int main(int argc, char * argv[]) {
     pthread_t tid[DEFAULT_NTHREADS];
@@ -39,11 +38,9 @@ int main(int argc, char * argv[]) {
     pthread_cond_init(&condition[0], NULL);
     pthread_cond_init(&condition[1], NULL);
 
-    pthread_create(&tid[0], NULL, task1, NULL);
-    pthread_create(&tid[1], NULL, task2, NULL);
-    pthread_create(&tid[2], NULL, task3, NULL);
-    pthread_create(&tid[3], NULL, task4, NULL);
-    pthread_create(&tid[4], NULL, task5, NULL);
+    for (long long i = 0; i < NTASKS; i++) {
+        pthread_create(&tid[i], NULL, tasks[i], (void *) i);
+    }
 
     for (int i = 0; i < DEFAULT_NTHREADS; i++) {
         pthread_join(tid[i], NULL);
@@ -56,9 +53,10 @@ int main(int argc, char * argv[]) {
     return 0;
 }
 
-void * task5(void * arg) {
-    puts(message[4]);
+void * last_task(void * arg) {
+    long long index = (long long) arg;
 
+    puts(message[index]);
     pthread_mutex_lock(&lock);
     message_count++;
     pthread_cond_broadcast(&condition[0]);
@@ -67,38 +65,25 @@ void * task5(void * arg) {
     return NULL;
 }
 
-void * task4(void * arg) {
+void * middle_task(void * arg) {
+    long long index = (long long) arg;
+
     pthread_mutex_lock(&lock);
     if (message_count == 0) pthread_cond_wait(&condition[0], &lock);
-    puts(message[3]);
+    puts(message[index]);
     if (++message_count == 4) pthread_cond_signal(&condition[1]);
     pthread_mutex_unlock(&lock);
 
     return NULL;
 }
 
-void * task3(void * arg) {
-    pthread_mutex_lock(&lock);
-    if (message_count == 0) pthread_cond_wait(&condition[0], &lock);
-    puts(message[2]);
-    if (++message_count == 4) pthread_cond_signal(&condition[1]);
-    pthread_mutex_unlock(&lock);
-    return NULL;
-}
+void * first_task(void * arg) {
+    long long index = (long long) arg;
 
-void * task2(void * arg) {
-    pthread_mutex_lock(&lock);
-    if (message_count == 0) pthread_cond_wait(&condition[0], &lock);
-    puts(message[1]);
-    if (++message_count == 4) pthread_cond_signal(&condition[1]);
-    pthread_mutex_unlock(&lock);
-    return NULL;
-}
-
-void * task1(void * arg) {
     pthread_mutex_lock(&lock);
     if (message_count != 4) pthread_cond_wait(&condition[1], &lock);
     pthread_mutex_unlock(&lock);
-    puts(message[0]);
+    puts(message[index]);
+
     return NULL;
 }
