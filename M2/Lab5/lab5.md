@@ -1,4 +1,4 @@
-# Questionário - Módulo 2, Laboratório 1
+# Questionário - Módulo 2, Laboratório 5
 
 ## Atividade 1
 #### Tópico 2 - Execute o programa *várias vezes*. O log de execução impresso na tela foi sempre o esperado? A condição lógica da aplicação foi atendida em todas as execuções?
