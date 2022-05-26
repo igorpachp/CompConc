@@ -16,6 +16,7 @@
 // variaveis do problema
 int leit = 0; // contador de threads lendo
 int escr = 0; // contador de threads escrevendo
+int espr = 0; // contador de threads esperando
 
 //variaveis para sincronizacao
 pthread_mutex_t mutex;
@@ -25,7 +26,7 @@ pthread_cond_t cond_leit, cond_escr;
 void InicLeit (int id) {
     pthread_mutex_lock(&mutex);
     printf("L[%d] quer ler\n", id);
-    while(escr > 0) {
+    while(escr > 0 || espr > 0) {
         printf("L[%d] bloqueou\n", id);
         pthread_cond_wait(&cond_leit, &mutex);
         printf("L[%d] desbloqueou\n", id);
@@ -49,8 +50,10 @@ void InicEscr (int id) {
     printf("E[%d] quer escrever\n", id);
     while((leit > 0) || (escr > 0)) {
         printf("E[%d] bloqueou\n", id);
+        espr++;
         pthread_cond_wait(&cond_escr, &mutex);
         printf("E[%d] desbloqueou\n", id);
+        espr--;
     }
     escr++;
     pthread_mutex_unlock(&mutex);
