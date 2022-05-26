@@ -1,6 +1,6 @@
 /* Disciplina: Computacao Concorrente */
 /* Prof.: Silvana Rossetto */
-/* Módulo 2 - Laboratório: 1 */
+/* Módulo 2 - Laboratório: 5 */
 /* Aluno: Igor Pacheco Pereira */
 /* DRE: 119052447 */
 /* Codigo: Sincronização condicional com variáveis de condição */
