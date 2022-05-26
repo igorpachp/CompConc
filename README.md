@@ -8,4 +8,5 @@ Este repositório é destinado à entrega das laboratórios da disciplina  Compu
 - [Lab 3](./M1/Lab3) - Implementação e avaliação de aplicações concorrentes (parte 2)
 - [Lab 4](./M1/Lab4) - Comunicação e sincronização de threads com memória
 #### Módulo 2
- - [Lab 1](./M2/Lab1) - Sincronização condicional com variáveis de condição
+ - [Lab 5](./M2/Lab5) - Sincronização condicional com variáveis de condição
+ - [Lab 6](./M2/Lab6) - Problemas clássicos de concorrência usando locks e variáveis de condição (leitores/escritores)
