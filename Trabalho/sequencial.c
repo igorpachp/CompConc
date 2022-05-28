@@ -21,8 +21,8 @@ double integral_continua(double (*function)(double), unsigned intervals, double 
     return sum * distance / 2;
 }
 
-double integral_continua_com_precisao(double (*function)(double), double lower_edge, double upper_edge, double precision, double derivative_ceil) {
-    unsigned intervals = ceil(sqrt(pow(upper_edge - lower_edge, 3) * derivative_ceil / (12 * precision)));
+double integral_continua_com_precisao(double (*function)(double), double lower_edge, double upper_edge, double precision, double second_derivative_ceil) {
+    unsigned intervals = ceil(sqrt(pow(upper_edge - lower_edge, 3) * second_derivative_ceil / (12 * precision)));
 
     return integral_continua(function, intervals, lower_edge, upper_edge);
 }

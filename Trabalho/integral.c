@@ -16,7 +16,7 @@ int main() {
 
     printf("%lf\n", integral_discreta(x, y, sizeof(x) / sizeof(double)));
     printf("%lf\n", integral_continua(reference_function, 10, -1, 1));
-    printf("%lf\n", integral_continua_com_precisao(reference_function, -1, 1, 0.01, 1.65));
+    printf("%lf\n", integral_continua_com_precisao(reference_function, -1, 1, 0.01, 4.62));
 
     return 0;
 }
