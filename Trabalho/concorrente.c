@@ -12,19 +12,15 @@ void * integral_discreta_concorrente(void * arg) {
         exit(-1);
     }
 
-    int first = args->tid * args->size / NTHREADS;
-    int last = (args->tid != (NTHREADS - 1)) ? (args->tid + 1) * (args->size - 1) / NTHREADS : args->size;
+    int first = args->tid * ((args->size - 1) / NTHREADS);
+    int last = (args->tid != (NTHREADS - 1)) ? (args->tid + 1) * ((args->size - 1) / NTHREADS) : args->size - 1;
 
-    printf("size: %d\t\tprimeiro: %d\nultimo: %d\n",args->size, first, last);
     for (int i = first; i < last; i++) {
         *sum += (args->y[i] + args->y[i + 1]) * (args->x[i + 1] - args->x[i]);
-        printf("passo: %d\t\tsum: %lf\n", i, *sum);
     }
 
     free(args);
-
     *sum /= 2;
-    puts("aqui");
 
     pthread_exit((void *) sum);
 }
