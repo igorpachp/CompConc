@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include "sequencial.h"
 #include "concorrente.h"
+#include "macros.h"
 
 unsigned NTHREADS = 4;
 
@@ -24,20 +25,14 @@ int main() {
     printf("%lf\n", integral_continua_sequencial(reference_function, 10, -1, 1));
     printf("%lf\n", integral_continua_com_precisao_sequencial(reference_function, -1, 1, 0.01, 4.62));
 
-    for (int i = 0; i < NTHREADS; i++) {
-        IDiscreta_args_t * args = (IDiscreta_args_t *) malloc(sizeof(IDiscreta_args_t));
-        if (!args) {
-            fprintf(stderr, "--ERRO: malloc()\n");
-            exit(-1);
-        }
-
-        args->size = sizeof(x) / sizeof(double);
-        args->tid = i;
-        args->x = &x;
-        args->y = &y;
-        pthread_create(tid + i, NULL, integral_discreta_concorrente, args);
+    IDiscreta_args_t ** args = (IDiscreta_args_t **) malloc(sizeof(IDiscreta_args_t *) * NTHREADS);
+    if (!args) {
+        fprintf(stderr, "--ERRO: malloc()\n");
+        exit(-1);
     }
-
+    FILL_DISCRETA_ARGS(args, sizeof(x) / sizeof(double), &x, &y, NTHREADS);
+    CREATE_THREADS(tid, NULL, integral_discreta_concorrente, args, NTHREADS);
+    
     double integral = 0;
     double * resultado;
     for (int i = 0; i < NTHREADS; i++) {
@@ -50,6 +45,7 @@ int main() {
     printf("%lf\n", integral);
 
     free(resultado);
+    free(args);
 
     return 0;
 }
