@@ -24,3 +24,27 @@ void * integral_discreta_concorrente(void * arg) {
 
     pthread_exit((void *) sum);
 }
+
+void * integral_continua_concorrente(void * arg) {
+    IContinua_args_t * args = (IContinua_args_t *) arg;
+    double distance = (args->upper_edge - args->lower_edge) / args->intervals;
+    double * sum = malloc(sizeof(double));
+    if (!sum) {
+        fprintf(stderr, "--ERRO: malloc()\n");
+        exit(-1);
+    }
+
+    double first = args->lower_edge + (distance * (args->intervals / NTHREADS)) * args->tid;
+    double last = (args->tid != (NTHREADS - 1)) ? args->lower_edge + (distance * (args->intervals / NTHREADS)) * (args->tid + 1) : args->upper_edge;
+
+    *sum = args->function(first) + args->function(last);
+
+    for (int i = 1; i < round((last - first) / distance); i++) {
+        *sum += 2 * args->function(first + distance * i);
+    }
+
+    free(args);
+    *sum *= distance / 2;
+
+    pthread_exit(sum);
+}

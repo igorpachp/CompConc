@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include "sequencial.h"
 #include "concorrente.h"
-#include "macros.h"
 
 unsigned NTHREADS = 4;
 
@@ -25,13 +24,13 @@ int main() {
     printf("%lf\n", integral_continua_sequencial(reference_function, 10, -1, 1));
     printf("%lf\n", integral_continua_com_precisao_sequencial(reference_function, -1, 1, 0.01, 4.62));
 
-    IDiscreta_args_t ** args = (IDiscreta_args_t **) malloc(sizeof(IDiscreta_args_t *) * NTHREADS);
-    if (!args) {
+    IDiscreta_args_t ** args_discreta = (IDiscreta_args_t **) malloc(sizeof(IDiscreta_args_t *) * NTHREADS);
+    if (!args_discreta) {
         fprintf(stderr, "--ERRO: malloc()\n");
         exit(-1);
     }
-    FILL_DISCRETA_ARGS(args, sizeof(x) / sizeof(double), &x, &y, NTHREADS);
-    CREATE_THREADS(tid, NULL, integral_discreta_concorrente, args, NTHREADS);
+    FILL_DISCRETA_ARGS(args_discreta, sizeof(x) / sizeof(double), &x, &y, NTHREADS);
+    CREATE_THREADS(tid, NULL, integral_discreta_concorrente, args_discreta, NTHREADS);
     
     double integral = 0;
     double * resultado;
@@ -43,9 +42,28 @@ int main() {
         integral += *resultado;
     }
     printf("%lf\n", integral);
+    free(resultado);
+
+    integral = 0;
+    IContinua_args_t ** args_continua = (IContinua_args_t **) malloc(sizeof(IContinua_args_t *) * NTHREADS);
+    if (!args_continua) {
+        fprintf(stderr, "--ERRO: malloc()\n");
+        exit(-1);
+    }
+    FILL_CONTINUA_ARGS(args_continua, reference_function, 10, -1, 1, 4);
+    CREATE_THREADS(tid, NULL, integral_continua_concorrente, args_continua, NTHREADS);
+    for (int i = 0; i < NTHREADS; i++) {
+        if (pthread_join(*(tid + i), (void **) &resultado)) {
+            fprintf(stderr, "--ERRO: pthread_join()\n");
+            exit(-4);
+        }
+        integral += *resultado;
+    }
+    printf("%lf\n", integral);
 
     free(resultado);
-    free(args);
+    free(args_discreta);
+    free(args_continua);
 
     return 0;
 }

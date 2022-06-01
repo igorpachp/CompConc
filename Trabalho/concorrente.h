@@ -15,6 +15,21 @@
     }                                                                               \
 }
 
+#define FILL_CONTINUA_ARGS(__ARGSPTR, __FPTR, __INTERVALS, __LEDGE, __UEDGE, __NTHREADS) {      \
+    for (int i = 0; i < __NTHREADS; i++) {                                                      \
+        *(__ARGSPTR + i) = (IContinua_args_t *) malloc(sizeof(IContinua_args_t));               \
+        if (!__ARGSPTR) {                                                                       \
+            fprintf(stderr, "--ERRO: malloc()\n");                                              \
+            exit(-1);                                                                           \
+        }                                                                                       \
+        (*(__ARGSPTR + i))->function = __FPTR;                                                  \
+        (*(__ARGSPTR + i))->intervals = __INTERVALS;                                            \
+        (*(__ARGSPTR + i))->lower_edge = __LEDGE;                                               \
+        (*(__ARGSPTR + i))->upper_edge = __UEDGE;                                               \
+        (*(__ARGSPTR + i))->tid = i;                                                            \
+    }                                                                                           \
+}
+
 #define CREATE_THREADS(__TIDPTR, __ATTR, __ROUTINE, __ARGSPTR, __NTHREADS) {                \
     for(int i = 0; i < __NTHREADS; i++) {                                                   \
         if(pthread_create(__TIDPTR + i, __ATTR, __ROUTINE, (void *) *(__ARGSPTR + i))) {    \
@@ -29,11 +44,19 @@ typedef struct {
     double * y;
     unsigned size;
     unsigned tid;
-    unsigned nthreads;
 } IDiscreta_args_t;
+
+typedef struct {
+    double (*function)(double);
+    unsigned intervals;
+    double lower_edge;
+    double upper_edge;
+    unsigned tid;
+} IContinua_args_t;
 
 extern unsigned NTHREADS;
 
 void * integral_discreta_concorrente(void *);
+void * integral_continua_concorrente(void *);
 
 #endif
