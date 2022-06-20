@@ -60,6 +60,7 @@ typedef struct {
     double * y;
     unsigned size;
     unsigned tid;
+    unsigned nthreads;
 } IDiscreta_args_t;
 
 typedef struct {
@@ -68,6 +69,7 @@ typedef struct {
     double lower_edge;
     double upper_edge;
     unsigned tid;
+    unsigned nthreads;
 } IContinua_args_t;
 
 typedef struct {
@@ -77,6 +79,7 @@ typedef struct {
     double precision;
     double second_derivative_ceil;
     unsigned tid;
+    unsigned nthreads;
 } IPrecisao_args_t;
 
 extern unsigned NTHREADS;
