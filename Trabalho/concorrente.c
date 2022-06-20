@@ -30,7 +30,7 @@ void * integral_discreta_concorrente(void * arg) {
     }
 
     // método do trapézio calculado pelos fluxos de forma alternada
-    for (int i = args->tid; i < args->size - 1; i += NTHREADS) {
+    for (int i = args->tid; i < args->size - 1; i += args->nthreads) {
         *sum += (args->y[i] + args->y[i + 1]) * (args->x[i + 1] - args->x[i]);
     }
     *sum /= 2;
@@ -69,7 +69,7 @@ void * integral_continua_concorrente(void * arg) {
     }
 
     // método do trapézio calculado pelos fluxos de forma alternada
-    for (double i = args->lower_edge + args->tid * distance; i < args->upper_edge; i += distance * NTHREADS) {
+    for (double i = args->lower_edge + args->tid * distance; i < args->upper_edge; i += distance * args->nthreads) {
         *sum += (args->function(i) + args->function(i + distance)) * distance;
     }
     *sum /= 2;
@@ -120,7 +120,7 @@ void * integral_continua_com_precisao_concorrente(void * arg) {
     }
 
     // método do trapézio calculado pelos fluxos de forma alternada
-    for (double i = args->lower_edge + args->tid * distance; i < args->upper_edge; i += distance * NTHREADS) {
+    for (double i = args->lower_edge + args->tid * distance; i < args->upper_edge; i += distance * args->nthreads) {
         *sum += (args->function(i) + args->function(i + distance)) * distance;
     }
     *sum /= 2;
