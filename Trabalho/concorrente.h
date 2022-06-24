@@ -15,15 +15,9 @@ unsigned INTERVALS;
 double LOWER_EDGE;
 double UPPER_EDGE;
 
-typedef struct {
-    double (*function)(double);
-    double lower_edge;
-    double upper_edge;
-    double precision;
-    double second_derivative_ceil;
-    unsigned tid;
-    unsigned nthreads;
-} IPrecisao_args_t;
+// VARIAVEIS DE PRECISAO
+double TOLERANCE;
+double SECOND_DERIVATIVE_CEIL;
 
 void * integral_discreta_concorrente(void *);
 void * integral_continua_concorrente(void *);
