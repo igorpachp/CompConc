@@ -1,13 +1,13 @@
 #ifndef __CONCORRENTE_H__
 #define __CONCORRENTE_H__
 
-typedef struct {
-    double * x;
-    double * y;
-    unsigned size;
-    unsigned tid;
-    unsigned nthreads;
-} IDiscreta_args_t;
+// VARIAVEIS GERAIS
+unsigned NTHREADS;
+
+// VARIAVEIS DISCRETAS
+double * X_COORD;
+double * Y_COORD;
+unsigned COORD_ARR_SZ;
 
 typedef struct {
     double (*function)(double);

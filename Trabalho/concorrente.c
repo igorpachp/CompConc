@@ -11,18 +11,13 @@
  * obtido por cada fluxo.
  * 
  * Entradas esperadas:
- *   arg --> Um ponteiro para uma estrutura do tipo 'IDiscreta_args_t', que contém os campos:
- *     x -> um ponteiro para as coordenadas no eixo x ordenadas de forma crescente;
- *     y -> um ponteiro para as coordenadas no eixo y ordenadas de forma crescente;
- *     size -> o número de coordenadas em 'x' e 'y';
- *     tid -> o número da thread;
- *     nthreads -> a quantidade de threads paralelas;
+ *   arg --> Um ponteiro para inteiro, o número da thread;
  * 
  * Retorna:
  *   sum --> um ponteiro (fazer cast para double *) para o resultado da soma parcial calculada pela thread;
  */
 void * integral_discreta_concorrente(void * arg) {
-    IDiscreta_args_t * args = (IDiscreta_args_t *) arg;
+    int * tid = (int *) arg;
     double * sum = (double *) malloc(sizeof(double));
     if (!sum) {
         fprintf(stderr, "--ERRO: malloc()\n");
@@ -30,12 +25,10 @@ void * integral_discreta_concorrente(void * arg) {
     }
 
     // método do trapézio calculado pelos fluxos de forma alternada
-    for (int i = args->tid; i < args->size - 1; i += args->nthreads) {
-        *sum += (args->y[i] + args->y[i + 1]) * (args->x[i + 1] - args->x[i]);
+    for (int i = *tid; i < COORD_ARR_SZ - 1; i += NTHREADS) {
+        *sum += (Y_COORD[i] + Y_COORD[i + 1]) * (X_COORD[i + 1] - X_COORD[i]);
     }
     *sum /= 2;
-
-    free(args);
 
     pthread_exit((void *) sum);
 }

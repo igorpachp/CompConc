@@ -8,10 +8,8 @@
 
 #define DEFAULT_NTHREADS    4
 #define DEFAULT_RANGE       10
-#define DEFAULT_PRECISION   pow(10, -15)
+#define DEFAULT_PRECISION   pow(10, -6)
 #define DEFAULT_DERIVATIVE  4.62
-
-unsigned NTHREADS;
 
 double * range(double lower_edge, double upper_edge, unsigned n, double (*function)(double)) {
     double * arr = (double *) malloc(sizeof(double) * (n + 1));
@@ -39,10 +37,6 @@ int main(int argc, char * argv[]) {
     double start_s, end_s, elapsed_s;
     double start_c, end_c, elapsed_c;
 
-    // ARRAYS DE REFERENCIA
-    double * x;
-    double * y;
-
     // VARIAVEIS PARA GUARDAR RESULTADO
     double integral;
     double * resultado;
@@ -57,18 +51,20 @@ int main(int argc, char * argv[]) {
         case 1:
             NTHREADS = DEFAULT_NTHREADS;
             intervals = DEFAULT_RANGE;
+            COORD_ARR_SZ = intervals + 1;
             lower = -1.0;
             upper = 1.0;
-            x = range(lower, upper, intervals, NULL);
-            y = range(x[0], x[intervals], intervals, reference_function);
+            X_COORD = range(lower, upper, intervals, NULL);
+            Y_COORD = range(X_COORD[0], X_COORD[intervals], intervals, reference_function);
             break;
         case 5:
             intervals = atoi(argv[3]);
+            COORD_ARR_SZ = intervals + 1;
             NTHREADS = atoi(argv[4]);
             lower = strtod(argv[1], NULL);
             upper = strtod(argv[2], NULL);
-            x = range(lower, upper, intervals, NULL);
-            y = range(x[0], x[intervals], intervals, reference_function);
+            X_COORD = range(lower, upper, intervals, NULL);
+            Y_COORD = range(X_COORD[0], X_COORD[intervals], intervals, reference_function);
             break;
         default:
             fprintf(stderr, "--ERRO: Numero de parametros incorreto!\n");
@@ -79,17 +75,17 @@ int main(int argc, char * argv[]) {
     }
 
     // VARIAVEIS CONCORRENTES
-    pthread_t tid[NTHREADS];
-    IDiscreta_args_t * args_discreta;
+    pthread_t tid_sys[NTHREADS];
+    int inner_tid[NTHREADS];
     IContinua_args_t * args_continua;
     IPrecisao_args_t * args_precisao;
 
     // TESTE SEQUENCIAL: FUNÇÃO DISCRETA ===============================================
     GET_TIME(start_s);
-    integral = integral_discreta_sequencial(x, y, intervals+1);
+    integral = integral_discreta_sequencial(X_COORD, Y_COORD, COORD_ARR_SZ);
     GET_TIME(end_s);
     elapsed_s = end_s - start_s;
-    printf("resultado sequencial discreta: %lf\n", integral);
+    printf("resultado sequencial discreta:  %lf\n", integral);
     // FIM TESTE =======================================================================
 
     integral = 0;
@@ -97,22 +93,11 @@ int main(int argc, char * argv[]) {
     GET_TIME(start_c);
     // criando as threads da função discreta
     for (int i = 0; i < NTHREADS; i++) {
-        // alocando argumentos da função discreta
-        args_discreta = (IDiscreta_args_t *) malloc(sizeof(IDiscreta_args_t));
-        if (!args_discreta) {
-            fprintf(stderr, "--ERRO: malloc()\n");
-            exit(-1);
-        }
-
         // preenchendo argumentos da função discreta
-        args_discreta->x = x;
-        args_discreta->y = y;
-        args_discreta->size = intervals + 1;
-        args_discreta->tid = i;
-        args_discreta->nthreads = NTHREADS;
+        inner_tid[i] = i;
 
         // criando threads da função discreta
-        if(pthread_create(&tid[i], NULL, integral_discreta_concorrente, (void *) args_discreta)) {
+        if(pthread_create(&tid_sys[i], NULL, integral_discreta_concorrente, (void *) &inner_tid[i])) {
             fprintf(stderr, "--ERRO: pthread_create()\n");
             exit(-2);
         }
@@ -120,7 +105,7 @@ int main(int argc, char * argv[]) {
 
     // recebendo resultados
     for (int i = 0; i < NTHREADS; i++) {
-        if (pthread_join(*(tid + i), (void **) &resultado)) {
+        if (pthread_join(*(tid_sys + i), (void **) &resultado)) {
             fprintf(stderr, "--ERRO: pthread_join()\n");
             exit(-4);
         }
@@ -166,7 +151,7 @@ int main(int argc, char * argv[]) {
         args_continua->nthreads = NTHREADS;
 
         // criando threads da função continua
-        if(pthread_create(&tid[i], NULL, integral_continua_concorrente, (void *) args_continua)) {
+        if(pthread_create(&tid_sys[i], NULL, integral_continua_concorrente, (void *) args_continua)) {
             fprintf(stderr, "--ERRO: pthread_create()\n");
             exit(-2);
         }
@@ -174,7 +159,7 @@ int main(int argc, char * argv[]) {
 
     // recebendo resultados
     for (int i = 0; i < NTHREADS; i++) {
-        if (pthread_join(*(tid + i), (void **) &resultado)) {
+        if (pthread_join(*(tid_sys + i), (void **) &resultado)) {
             fprintf(stderr, "--ERRO: pthread_join()\n");
             exit(-4);
         }
@@ -221,7 +206,7 @@ int main(int argc, char * argv[]) {
         args_precisao->nthreads = NTHREADS;
 
         // criando threads da função com precisao
-        if(pthread_create(&tid[i], NULL, integral_continua_com_precisao_concorrente, (void *) args_precisao)) {
+        if(pthread_create(&tid_sys[i], NULL, integral_continua_com_precisao_concorrente, (void *) args_precisao)) {
             fprintf(stderr, "--ERRO: pthread_create()\n");
             exit(-2);
         }
@@ -229,7 +214,7 @@ int main(int argc, char * argv[]) {
 
     // recebendo resultados
     for (int i = 0; i < NTHREADS; i++) {
-        if (pthread_join(*(tid + i), (void **) &resultado)) {
+        if (pthread_join(*(tid_sys + i), (void **) &resultado)) {
             fprintf(stderr, "--ERRO: pthread_join()\n");
             exit(-4);
         }
@@ -246,8 +231,8 @@ int main(int argc, char * argv[]) {
     printf("\ttempo concorrente: %lf\n", elapsed_c);
     printf("\taceleracao: %lf\n\n", elapsed_s / elapsed_c);
 
-    free(x);
-    free(y);
+    free(X_COORD);
+    free(Y_COORD);
 
     return 0;
 }
