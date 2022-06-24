@@ -41,33 +41,27 @@ void * integral_discreta_concorrente(void * arg) {
  * obtido por cada fluxo.
  * 
  * Entradas esperadas:
- *   arg --> Um ponteiro para uma estrutura do tipo 'IContinua_args_t', que contém os campos:
- *     function -> uma função matemática genérica que receba e rotorne um 'double';
- *     intervals -> o número de divisões desejado no intervalo;
- *     lower_edge -> o limite inferior do intervalo, incluso;
- *     upper_edge -> o limite superior do intervalo, incluso;
- *     tid -> o número da thread;
- *     nthreads -> a quantidade de threads paralelas;
+ *   arg --> Um ponteiro para inteiro, o número da thread;
  * 
  * Retorna:
  *   sum --> um ponteiro (fazer cast para double *) para o resultado da soma parcial calculada pela thread;
  */
 void * integral_continua_concorrente(void * arg) {
-    IContinua_args_t * args = (IContinua_args_t *) arg;
-    double distance = (args->upper_edge - args->lower_edge) / args->intervals; // calculo do tamanho das subdivisões
+    int * tid = (int *) arg;
+    double distance = (UPPER_EDGE - LOWER_EDGE) / INTERVALS;
     double * sum = malloc(sizeof(double));
     if (!sum) {
         fprintf(stderr, "--ERRO: malloc()\n");
         exit(-1);
     }
 
-    // método do trapézio calculado pelos fluxos de forma alternada
-    for (double i = args->lower_edge + args->tid * distance; i < args->upper_edge; i += distance * args->nthreads) {
-        *sum += (args->function(i) + args->function(i + distance)) * distance;
+    if (*tid == 0) {
+        *sum = FUNCTION(LOWER_EDGE) + FUNCTION(UPPER_EDGE);
     }
-    *sum /= 2;
-
-    free(args);
+    for (unsigned i = *tid ? *tid : NTHREADS; i < INTERVALS; i += NTHREADS) {
+        *sum += 2 * FUNCTION(LOWER_EDGE + distance * i);
+    }
+    *sum *= distance/2;
 
     pthread_exit(sum);
 }

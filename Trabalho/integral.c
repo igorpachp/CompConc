@@ -50,21 +50,21 @@ int main(int argc, char * argv[]) {
     {
         case 1:
             NTHREADS = DEFAULT_NTHREADS;
-            intervals = DEFAULT_RANGE;
-            COORD_ARR_SZ = intervals + 1;
-            lower = -1.0;
-            upper = 1.0;
-            X_COORD = range(lower, upper, intervals, NULL);
-            Y_COORD = range(X_COORD[0], X_COORD[intervals], intervals, reference_function);
+            INTERVALS = intervals = DEFAULT_RANGE;
+            COORD_ARR_SZ = INTERVALS + 1;
+            LOWER_EDGE = lower = -1.0;
+            UPPER_EDGE = upper = 1.0;
+            X_COORD = range(LOWER_EDGE, UPPER_EDGE, INTERVALS, NULL);
+            Y_COORD = range(X_COORD[0], X_COORD[INTERVALS], INTERVALS, reference_function);
             break;
         case 5:
-            intervals = atoi(argv[3]);
-            COORD_ARR_SZ = intervals + 1;
+            INTERVALS = intervals = atoi(argv[3]);
+            COORD_ARR_SZ = INTERVALS + 1;
             NTHREADS = atoi(argv[4]);
-            lower = strtod(argv[1], NULL);
-            upper = strtod(argv[2], NULL);
-            X_COORD = range(lower, upper, intervals, NULL);
-            Y_COORD = range(X_COORD[0], X_COORD[intervals], intervals, reference_function);
+            LOWER_EDGE = lower = strtod(argv[1], NULL);
+            UPPER_EDGE = upper = strtod(argv[2], NULL);
+            X_COORD = range(LOWER_EDGE, UPPER_EDGE, INTERVALS, NULL);
+            Y_COORD = range(X_COORD[0], X_COORD[INTERVALS], INTERVALS, reference_function);
             break;
         default:
             fprintf(stderr, "--ERRO: Numero de parametros incorreto!\n");
@@ -77,7 +77,6 @@ int main(int argc, char * argv[]) {
     // VARIAVEIS CONCORRENTES
     pthread_t tid_sys[NTHREADS];
     int inner_tid[NTHREADS];
-    IContinua_args_t * args_continua;
     IPrecisao_args_t * args_precisao;
 
     // TESTE SEQUENCIAL: FUNÇÃO DISCRETA ===============================================
@@ -124,7 +123,7 @@ int main(int argc, char * argv[]) {
 
     // TESTE SEQUENCIAL: FUNÇÃO CONTINUA ===============================================
     GET_TIME(start_s);
-    integral = integral_continua_sequencial(reference_function, intervals, lower, upper);
+    integral = integral_continua_sequencial(reference_function, INTERVALS, LOWER_EDGE, UPPER_EDGE);
     GET_TIME(end_s);
     elapsed_s = end_s - start_s;
     printf("sequencial continua: %lf\n", integral);
@@ -133,25 +132,14 @@ int main(int argc, char * argv[]) {
     integral = 0;
     // TESTE CONCORRENTE: FUNÇÃO CONTINUA ==============================================
     GET_TIME(start_c);
+    FUNCTION = reference_function;
     // criando as threads da função continua
     for (int i = 0; i < NTHREADS; i++) {
-        // alocando argumentos da função continua
-        args_continua = (IContinua_args_t *) malloc(sizeof(IContinua_args_t));
-        if (!args_continua) {
-            fprintf(stderr, "--ERRO: malloc()\n");
-            exit(-1);
-        }
-
         // preenchendo argumentos da função continua
-        args_continua->function = reference_function;
-        args_continua->intervals = intervals;
-        args_continua->lower_edge = lower;
-        args_continua->upper_edge = upper;
-        args_continua->tid = i;
-        args_continua->nthreads = NTHREADS;
+        inner_tid[i] = i;
 
         // criando threads da função continua
-        if(pthread_create(&tid_sys[i], NULL, integral_continua_concorrente, (void *) args_continua)) {
+        if(pthread_create(&tid_sys[i], NULL, integral_continua_concorrente, (void *) &inner_tid[i])) {
             fprintf(stderr, "--ERRO: pthread_create()\n");
             exit(-2);
         }

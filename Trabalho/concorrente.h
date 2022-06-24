@@ -9,14 +9,11 @@ double * X_COORD;
 double * Y_COORD;
 unsigned COORD_ARR_SZ;
 
-typedef struct {
-    double (*function)(double);
-    unsigned intervals;
-    double lower_edge;
-    double upper_edge;
-    unsigned tid;
-    unsigned nthreads;
-} IContinua_args_t;
+// VARIAVEIS CONTINUAS
+double (*FUNCTION)(double);
+unsigned INTERVALS;
+double LOWER_EDGE;
+double UPPER_EDGE;
 
 typedef struct {
     double (*function)(double);
