@@ -32,34 +32,6 @@ double reference_function(double x) {
     return 0.5 * sin(3 * x) + 3 * cos(x / 5);
 }
 
-void * fteste(void * arg) {
-    int * tid = (int *) arg;
-    // para calcular quantos intervalos devemos usar para chegar a precisão desejada
-    // utilizamos a equação de estimativa de erro da interpolação linear
-    // E = M(b-a)^3 / 12  , para todo ponto 'c' tal que a <= c <= b e f"(c) <= M
-    // dividindo o intervalo [a, b] em n segmentos de tamanha h = (b - a) / n
-    // E = nMh^3 / 12 logo, n = sqrt(M(b-a)^3 / 12E)
-    unsigned intervals = ceil(sqrt(pow(UPPER_EDGE - LOWER_EDGE, 3) * SECOND_DERIVATIVE_CEIL / (12 * TOLERANCE))); // calculo do número de intervalos
-    double distance = (UPPER_EDGE - LOWER_EDGE) / intervals; // calculo do tamanho das subdivisões
-
-    double * sum = malloc(sizeof(double));
-    if (!sum) {
-        fprintf(stderr, "--ERRO: malloc()\n");
-        exit(-1);
-    }
-
-    if (*tid == 0) {
-        *sum = FUNCTION(LOWER_EDGE) + FUNCTION(UPPER_EDGE);
-    }
-
-    for (unsigned i = *tid ? *tid : NTHREADS; i < intervals; i += NTHREADS) {
-        *sum += 2 * FUNCTION(LOWER_EDGE + distance * i);
-    }
-    *sum *= distance/2;
-
-    pthread_exit(sum);
-}
-
 int main(int argc, char * argv[]) {
     // VARIAVEIS PARA MEDIÇÃO DE TEMPO
     double start_s, end_s, elapsed_s;
@@ -231,7 +203,7 @@ int main(int argc, char * argv[]) {
         inner_tid[i] = i;
 
         // criando threads da função com precisao
-        if(pthread_create(&tid_sys[i], NULL, fteste, (void *) &inner_tid[i])) {
+        if(pthread_create(&tid_sys[i], NULL, integral_continua_com_precisao_concorrente, (void *) &inner_tid[i])) {
             fprintf(stderr, "--ERRO: pthread_create()\n");
             exit(-2);
         }
