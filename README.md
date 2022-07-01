@@ -12,3 +12,5 @@ Este repositório é destinado à entrega das laboratórios da disciplina  Compu
  - [Lab 6](./M2/Lab6) - Problemas clássicos de concorrência usando locks e variáveis de condição (leitores/escritores)
  - [Lab 7](./M2/Lab7) - Introdução à programação concorrente em Java
  - [Lab 8](./M2/Lab8) - Implementação de uma aplicação que usa o padrão leitores/escritores usando o conceito de monitores
+#### Módulo 3
+ - [Lab 9](./M3/Lab9) - Exercício com semáforos
